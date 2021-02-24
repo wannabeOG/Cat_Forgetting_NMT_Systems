@@ -1,0 +1,46 @@
+corpora:
+    # ilci:
+    #     splits: ['train']
+    #     # langs: [ 'en', 'hi',  'ta', 'te', 'ml', 'ur', 'bn']
+    #     langs: ['en', 'hi']
+        # langs: ['en', 'hi']
+        # wat-ilmpc:
+        # wat-splits: ['dev']
+        # wat-langs: ['en', 'ta']
+    # iitb-hi-en:
+    #     splits: ['train', 'dev', 'test']
+    #     langs: ['en', 'hi']
+    # wat-ilmpc:
+    #     splits: ['train', 'dev', 'test']
+    #     # langs: [ 'en', 'hi',  'ta', 'te', 'ml', 'ur', 'bn']
+    #     langs: ['en', 'ta']
+    # national-newscrawl:
+    #     splits: ['train']
+    #     langs: ['en', 'hi']
+    # ufal-en-tam:
+    #     splits: ['train', 'test', 'dev']
+    #     langs: ['en', 'ta']
+    # mechturk-en-te:
+    #     splits: ['train', 'dev', 'test']
+    #     langs: ['en', 'te']
+    # complete-en-te:
+    #     splits: ['train', 'dev', 'test']
+    #     langs: ['en', 'te']
+    complete-en-ml:
+        splits: ['train', 'dev', 'test']
+        langs: ['en', 'ml']
+    # pib-en-mar:
+    #    splits: ['train','dev','test']
+    #    langs: ['en','mr']
+    # pretrain-en-tam:
+    #     splits: ['train', 'dev']
+    #     langs: ['en', 'ta']
+
+dictionary:
+    src: '/home/shashanks/ilmulti/ilmulti/sentencepiece/central.dict'
+    tgt: '/home/shashanks/ilmulti/ilmulti/sentencepiece/central.dict'
+
+hard_coded_dict: {
+    'en': 4000,
+    'ml': 4000
+}
