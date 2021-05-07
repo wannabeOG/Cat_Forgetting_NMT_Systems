@@ -20,15 +20,137 @@ from fairseq.trainer import Trainer
 from fairseq.meters import AverageMeter, StopwatchMeter
 
 
+def vocab_code():
+    
+    print ("Executing the vocab checkpoint code")
+    
+    #Task 2
+    french_english_file = open("/content/drive/My Drive/RA-Project-IIIT-H/Cat_Forgetting/ilmulti-master/resources/cat_forgetting_dicts/en-fr.dict.txt", 'r')
+    dict_fr_text = french_english_file.readlines()
+    
+    #Task 1
+    spanish_english_file = open("/content/drive/My Drive/RA-Project-IIIT-H/Cat_Forgetting/ilmulti-master/resources/cat_forgetting_dicts/en-es.dict.txt", 'r')
+    dict_es_text = spanish_english_file.readlines()
+    
+    #Combined tasks dictionary
+    combined_dictionary = open("/content/drive/My Drive/RA-Project-IIIT-H/Cat_Forgetting/ilmulti-master/resources/cat_forgetting_dicts/en-fr-es.dict.txt", 'r')
+    dict_es_fr_text = combined_dictionary.readlines()
+    
+    dict_fr = dict()
+    dict_es = dict()
+    dict_comb = dict()
+    
+    for i in range(len(dict_fr_text)):
+        a, b = dict_fr_text[i].strip().split()
+        dict_fr[a] = int(b)
+    
+    for i in range(len(dict_es_text)):
+        a, b = dict_es_text[i].strip().split()
+        dict_es[a] = int(b)
+        
+    for i in range(len(dict_es_fr_text)):
+        a, b = dict_es_fr_text[i].strip().split()
+        dict_comb[a] = int(b)
+        
+    intersecting_keys = set(dict_fr.keys()) & set(dict_es.keys())
+    
+    indices_dict_combined = dict()
+    indices_dict_original = dict()
+
+    #Intersect 
+    for i in range(len(list(intersecting_keys))):
+        if list(intersecting_keys)[i] in dict_comb:
+            indices_dict_combined[list(intersecting_keys)[i]] = list(dict_comb.keys()).index(list(intersecting_keys)[i])
+
+        if list(intersecting_keys)[i] in dict_es:
+            indices_dict_original[list(intersecting_keys)[i]] = list(dict_es.keys()).index(list(intersecting_keys)[i])
+    
+    # print ("Inside the vocab code function", indices_dict_original)
+    # print ("Inside the vocab code function", indices_dict_combined)
+    return (indices_dict_original, indices_dict_combined)
+    
+    
+def model_initializing(args, trainer, trainer_proxy, indices_dict_original, indices_dict_combined):
+    
+    print ("Initializing the model with the old checkpoint")
+    extra_state, epoch_itr = checkpoint_utils.load_checkpoint_vocab_loading(args, trainer_proxy)
+    # for param_tensor in trainer_proxy.get_model().state_dict():
+    #     print(param_tensor, "\t", trainer_proxy.get_model().state_dict()[param_tensor].size())
+    
+    # print ("Exiting")
+    # import sys
+    # sys.exit(0)
+    
+    # decoder.embed_tokens.weight 	 torch.Size([14880, 512])
+    # decoder.embed_positions._float_tensor 	 torch.Size([1])
+    
+    encoding_proxy_vector = trainer_proxy.get_model().state_dict()['encoder.embed_tokens.weight']
+    decoding_proxy_vector = trainer_proxy.get_model().state_dict()['decoder.embed_tokens.weight']
+    
+    encoding_current_vector = trainer.get_model().state_dict()['encoder.embed_tokens.weight']
+    decoding_current_vector = trainer.get_model().state_dict()['decoder.embed_tokens.weight']
+    
+    print ("Fitting the old values in the new ones now")
+    
+    for key, value in indices_dict_combined.items():
+        original_value = indices_dict_original[key]
+        new_value = value 
+        
+        encoding_current_vector[new_value, :].copy_(encoding_proxy_vector[original_value, :])
+        decoding_current_vector[new_value, :].copy_(decoding_proxy_vector[original_value, :])
+
+    trainer.get_model().state_dict()['encoder.embed_tokens.weight'].copy_(encoding_current_vector)
+    trainer.get_model().state_dict()['decoder.embed_tokens.weight'].copy_(decoding_current_vector)
+    
+    trainer.get_model().state_dict()['encoder.embed_positions._float_tensor'].copy_(trainer_proxy.get_model().state_dict()['encoder.embed_positions._float_tensor'])
+    trainer.get_model().state_dict()['decoder.embed_positions._float_tensor'].copy_(trainer_proxy.get_model().state_dict()['decoder.embed_positions._float_tensor'])
+    
+    #print (trainer_proxy.get_model().state_dict().keys())
+    #print (trainer.get_model().state_dict()['model'])
+    
+    trainer._build_optimizer()
+    epoch_itr = trainer.get_train_iterator(epoch=0)
+    val_loss = 1.000
+    
+    extra_state = {
+        'train_iterator': epoch_itr.state_dict(),
+        'val_loss': val_loss,
+    }
+    
+    trainer.save_checkpoint(os.path.join(args.save_dir, 'checkpoint_last.pt'), extra_state)
+    # state_dict = dict()
+    # state_dict['model'] = trainer.get_model().state_dict()
+    # state_dict['args'] = args
+    # state_dict['best_loss'] = 1.000
+    
+    # import os
+    # checkpoint_utils.torch_persistent_save(state_dict, os.path.join(args.save_dir, 'checkpoint_last.pt'))
+    # # trainer.save_checkpoint(os.path.join(args.save_dir, 'checkpoint_last.pt'), None)
+    
+    # print ("Inside the model initializing function")
+    # print (trainer.get_model().state_dict()['encoder.embed_tokens.weight'])
+    # print (trainer_proxy.get_model().state_dict()['encoder.embed_tokens.weight'])
+    # print (trainer.get_model().state_dict()['encoder.embed_positions._float_tensor'])
+    # print (trainer_proxy.get_model().state_dict()['encoder.embed_positions._float_tensor'])
+    
+    # print ("\n")
+    # print (trainer.get_model().state_dict()['decoder.embed_tokens.weight'])
+    # print (trainer_proxy.get_model().state_dict()['decoder.embed_tokens.weight'])
+    # print (trainer.get_model().state_dict()['decoder.embed_positions._float_tensor'])
+    # print (trainer_proxy.get_model().state_dict()['decoder.embed_positions._float_tensor'])
+    
+    
+
 def main(args, init_distributed=False):
     utils.import_user_module(args)
 
     assert args.max_tokens is not None or args.max_sentences is not None, \
         'Must specify batch size either with --max-tokens or --max-sentences'
-
+    
     # Initialize CUDA and distributed training
     if torch.cuda.is_available() and not args.cpu:
         torch.cuda.set_device(args.device_id)
+        
     torch.manual_seed(args.seed)
     if init_distributed:
         args.distributed_rank = distributed_utils.distributed_init(args)
@@ -38,9 +160,46 @@ def main(args, init_distributed=False):
 
     # Print args
     print(args)
+    
+    #print ("Hitting the if clause")
+    #print (args.flag_vocab_loading)
+    if (args.flag_vocab_loading == 2):
+        
+        #vocab code
+        indices_dict_original, indices_dict_combined = vocab_code()
+        # print ("Inside the main function", indices_dict_original)
+        # print ("Inside the main function", indices_dict_combined)
+        
+        #print ("Is this executing")
+        task = tasks.setup_task(args, flag = 1)
+        task_proxy = tasks.setup_task(args, flag = 2)
+        
+        model = task.build_model(args)
+        model_proxy = task_proxy.build_model(args)
+        
+        criterion = task.build_criterion(args)
+        criterion_proxy = task_proxy.build_criterion(args)
+        
+        # print("The new model is", model)
+        # print ("\n")
+        # print ("The old model is", model_proxy)
+        
+        trainer = Trainer (args, task, model, criterion)
+        trainer_proxy = Trainer (args, task_proxy, model_proxy, criterion_proxy)
+        
+        print ("Inside the main function")
+        print (trainer.get_model().state_dict()['encoder.embed_tokens.weight'])
+        print ("/n")
+    
+        model_initializing(args, trainer, trainer_proxy, indices_dict_original, indices_dict_combined)
+        
+        print ("Exiting")
+        import sys
+        sys.exit(0)
 
     # Setup task, e.g., translation, language modeling, etc.
-    task = tasks.setup_task(args)
+    task = tasks.setup_task(args, flag = 1)
+    
 
     # Load valid dataset (we load training data below, based on the latest checkpoint)
     for valid_sub_split in args.valid_subset.split(','):
@@ -48,18 +207,17 @@ def main(args, init_distributed=False):
 
     # Build model and criterion
     model = task.build_model(args)
+
     criterion = task.build_criterion(args)
 
     if (args.task == 'pretrain_lang_modeling'):
         split_create(model)
     
-    print(model)
     print('| model {}, criterion {}'.format(args.arch, criterion.__class__.__name__))
     print('| num. model params: {} (num. trained: {})'.format(
         sum(p.numel() for p in model.parameters()),
         sum(p.numel() for p in model.parameters() if p.requires_grad),
     ))
-
     # Build trainer
     trainer = Trainer(args, task, model, criterion)
     print('| training on {} GPUs'.format(args.distributed_world_size))
@@ -71,8 +229,10 @@ def main(args, init_distributed=False):
     # Load the latest checkpoint if one is available and restore the
     # corresponding train iterator
     extra_state, epoch_itr = checkpoint_utils.load_checkpoint(args, trainer)
+    
 
     # Train until the learning rate gets too small
+    args.max_epoch = 10
     max_epoch = args.max_epoch or math.inf
     max_update = args.max_update or math.inf
     lr = trainer.get_lr()
@@ -295,8 +455,9 @@ def distributed_main(i, args, start_rank=0):
 
 def cli_main():
     parser = options.get_training_parser()
+    #print ("Inside cli main", parser)
     args = options.parse_args_and_arch(parser)
-
+    #print ("Inside cli main", args)
     if args.distributed_init_method is None:
         distributed_utils.infer_init_method(args)
 

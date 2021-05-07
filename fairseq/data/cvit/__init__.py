@@ -3,7 +3,12 @@ import warnings
 from collections import namedtuple
 
 ENV_VAR='ILMULTI_CORPUS_ROOT'
-DATA_ROOT = os.getenv(ENV_VAR, None)
+PROXY_PATH_1 = "/content/drive/My Drive/RA-Project-IIIT-H/Cat_Forgetting/"
+os.environ['ENV_VAR'] = PROXY_PATH_1
+
+#DATA_ROOT = os.environ.get(ENV_VAR, None)
+DATA_ROOT = "/content/drive/My Drive/RA-Project-IIIT-H/Cat_Forgetting/Datasets"
+#DATA_ROOT = os.getenv(ENV_VAR, None)
 if DATA_ROOT is None:
     warnings.warn(
         "Please define {} in environment variable" .format(ENV_VAR)

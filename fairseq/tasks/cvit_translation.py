@@ -117,7 +117,7 @@ class CVITTranslationTask(FairseqTask):
         self.tgt_dict = tgt_dict
 
     @classmethod
-    def setup_task(cls, args, **kwargs):
+    def setup_task(cls, args, flag, **kwargs):
         """Setup the task (e.g., load dictionaries).
 
         Args:
@@ -149,15 +149,22 @@ class CVITTranslationTask(FairseqTask):
                 data = yaml.load(contents)
                 return data
 
-        path = "/home2/asvs/fairseq-working/config.yaml"
+        path = "/content/drive/My Drive/RA-Project-IIIT-H/Cat_Forgetting/fairseq-working/config.yaml"
         data = read_config(path)
         # self.pairs = pairs_select(data['corpo
         # ra'])
 
         # src_dict = cls.load_dictionary(os.path.join(paths[0], 'dict.{}.txt'.format(args.source_lang)))
         # tgt_dict = cls.load_dictionary(os.path.join(paths[0], 'dict.{}.txt'.format(args.target_lang)))
-        src_dict = cls.load_dictionary(data['dictionary']['src'])
-        tgt_dict = cls.load_dictionary(data['dictionary']['tgt'])
+        
+        if (flag == 1):
+            src_dict = cls.load_dictionary(data['dictionary_comb']['src'])
+            tgt_dict = cls.load_dictionary(data['dictionary_comb']['tgt'])
+        
+        elif (flag == 2):
+            src_dict = cls.load_dictionary(data['dictionary_og']['src'])
+            tgt_dict = cls.load_dictionary(data['dictionary_og']['tgt'])
+            
         assert src_dict.pad() == tgt_dict.pad()
         assert src_dict.eos() == tgt_dict.eos()
         assert src_dict.unk() == tgt_dict.unk()

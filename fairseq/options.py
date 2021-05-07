@@ -401,6 +401,10 @@ def add_checkpoint_args(parser):
                        help='metric to use for saving "best" checkpoints')
     group.add_argument('--maximize-best-checkpoint-metric', action='store_true',
                        help='select the largest metric value for saving "best" checkpoints')
+    group.add_argument('--flag-vocab-loading', type=int, default=1, metavar='N',   
+                        help='set flag to load the checkpoint')
+    group.add_argument('--old-checkpoint-save-dir', metavar='DIR', default='checkpoints',
+                       help='path to load the old checkpoints from')
     # fmt: on
     return group
 

@@ -218,6 +218,7 @@ class Dictionary(object):
             self.count.append(count)
 
     def _save(self, f, kv_iterator):
+        print ("This is f", f)
         if isinstance(f, str):
             os.makedirs(os.path.dirname(f), exist_ok=True)
             with open(f, 'w', encoding='utf-8') as fd:

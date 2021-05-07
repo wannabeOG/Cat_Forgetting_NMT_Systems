@@ -27,7 +27,8 @@ def build_corpus(corpus, config, rebuild=False):
 
 def get_pairs(data):
     corpora = []
-    for split in ['train','dev','test']:
+    for split in ['train','dev', 'test']:
+        print ("This is the split we are working on", split)
         pairs = pairs_select(data['corpora'], split) 
         #print(pairs)
         srcs,tgts = list(zip(*pairs))

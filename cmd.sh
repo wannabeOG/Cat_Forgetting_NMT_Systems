@@ -1,4 +1,4 @@
-#!bin/bash
+#! /bin/bash
 
 #module load python/3.7.0
 #module load pytorch/1.1.0
@@ -11,20 +11,20 @@ IMPORTS=(
     wat-ilmpc.tar
 )
 
-LOCAL_ROOT="/ssd_scratch/cvit/$USER"
-REMOTE_ROOT="/home2/$USER"
+LOCAL_ROOT='My Drive/RA-Project-IIIT-H/Cat_Forgetting'
+#REMOTE_ROOT="/home2/$USER"
 
 
-mkdir -p $LOCAL_ROOT/{data,checkpoints}
+mkdir -p $LOCAL_ROOT/{Datasets,Checkpoints}
 
-DATA=$LOCAL_ROOT/data
-CHECKPOINTS=$LOCAL_ROOT/checkpoints
+DATA=$LOCAL_ROOT/Datasets
+CHECKPOINTS=$LOCAL_ROOT/Checkpoints
+EPOCH=10
+# CHECKPOINTS_MT=$LOCAL_ROOT/ufal-transformer-big/transformer_checkpoints
+# CHECKPOINTS_LM=$LOCAL_ROOT/ufal-transformer-big/encoder_checkpoints
 
-CHECKPOINTS_MT=$LOCAL_ROOT/ufal-transformer-big/transformer_checkpoints
-CHECKPOINTS_LM=$LOCAL_ROOT/ufal-transformer-big/encoder_checkpoints
-
-mkdir -p $CHECKPOINTS_MT
-mkdir -p $CHECKPOINTS_LM
+# mkdir -p $CHECKPOINTS_MT
+# mkdir -p $CHECKPOINTS_LM
 
 #function copy {
 #    for IMPORT in ${IMPORTS[@]}; do
@@ -43,9 +43,10 @@ function train_mt {
         --task shared-multilingual-translation \
         --num-workers 0 \
         --arch transformer \
-        --max-tokens 5000 --lr 1e-4 --min-lr 1e-9 \
+        --max-tokens 2000 --lr 1e-4 --min-lr 1e-9 \
         --optimizer adam \
-        --save-dir $CHECKPOINTS \
+        --save-dir fr-trained-checkpoints \
+        --old-checkpoint-save-dir es-trained-checkpoints \
         --log-format simple --log-interval 200 \
         --criterion label_smoothed_cross_entropy \
         --dropout 0.1 --attention-dropout 0.1 --activation-dropout 0.1 \
@@ -53,7 +54,9 @@ function train_mt {
         --update-freq 2 \
         --reset-optimizer \
         --share-all-embeddings \
-        config.yaml 
+        --skip-invalid-size-inputs-valid-test \
+        --flag-vocab-loading 1 \
+        config.yaml
 }
 
 function train_lm {
@@ -69,6 +72,8 @@ function train_lm {
         --dropout 0.1 --attention-dropout 0.1 --activation-dropout 0.1 \
         --ddp-backend no_c10d \
         --update-freq 2 \
+        --skip-invalid-size-inputs-valid-test \
+        --flag-vocab-loading 1 \
         config.yaml 
         #--reset-optimizer \
 }

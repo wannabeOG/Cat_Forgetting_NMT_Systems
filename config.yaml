@@ -26,21 +26,34 @@ corpora:
     # complete-en-te:
     #     splits: ['train', 'dev', 'test']
     #     langs: ['en', 'te']
-    complete-en-ml:
+    # complete-en-ml:
+    #     splits: ['train', 'dev', 'test']
+    #     langs: ['en', 'ml']
+    europarl-en-fr:
         splits: ['train', 'dev', 'test']
-        langs: ['en', 'ml']
+        langs: ['en', 'fr']
     # pib-en-mar:
     #    splits: ['train','dev','test']
     #    langs: ['en','mr']
     # pretrain-en-tam:
     #     splits: ['train', 'dev']
     #     langs: ['en', 'ta']
+    
 
-dictionary:
-    src: '/home/shashanks/ilmulti/ilmulti/sentencepiece/central.dict'
-    tgt: '/home/shashanks/ilmulti/ilmulti/sentencepiece/central.dict'
+dictionary_og:
+    src: '/content/drive/My Drive/RA-Project-IIIT-H/Cat_Forgetting/ilmulti-master/resources/cat_forgetting_dicts/en-es.dict.txt'
+    tgt: '/content/drive/My Drive/RA-Project-IIIT-H/Cat_Forgetting/ilmulti-master/resources/cat_forgetting_dicts/en-es.dict.txt'
+
+dictionary_comb:
+    src: '/content/drive/My Drive/RA-Project-IIIT-H/Cat_Forgetting/ilmulti-master/resources/cat_forgetting_dicts/en-fr-es.dict.txt'
+    tgt: '/content/drive/My Drive/RA-Project-IIIT-H/Cat_Forgetting/ilmulti-master/resources/cat_forgetting_dicts/en-fr-es.dict.txt'
+
+# dictionary_comb:
+#     src: '/content/drive/My Drive/RA-Project-IIIT-H/Cat_Forgetting/ilmulti-master/resources/cat_forgetting_dicts/en-es.dict.txt'
+#     tgt: '/content/drive/My Drive/RA-Project-IIIT-H/Cat_Forgetting/ilmulti-master/resources/cat_forgetting_dicts/en-es.dict.txt'
+
 
 hard_coded_dict: {
-    'en': 4000,
-    'ml': 4000
+    'en': 8000,
+    'fr': 8000
 }

@@ -114,6 +114,24 @@ def PibEnMar_meta(split):
         corpora.append(corpus)
     return corpora
 
+@dataset_register('europarl-en-es', ['train','dev', 'test'])
+def EuroparlEnEs_meta(split):
+    corpora = []
+    for lang in ['en','es']: 
+        sub_path = 'en-es/{}.es-en.{}'.format(split, lang)
+        corpus = Corpus('en-es', data_abspath(sub_path), lang)
+        corpora.append(corpus)
+    return corpora
+    
+@dataset_register('europarl-en-fr', ['train','dev', 'test'])
+def EuroparlEnEs_meta(split):
+    corpora = []
+    for lang in ['en','fr']: 
+        sub_path = 'en-fr/{}.fr-en.{}'.format(split, lang)
+        corpus = Corpus('en-fr', data_abspath(sub_path), lang)
+        corpora.append(corpus)
+    return corpora
+
 if __name__ == '__main__':
     def merge(*_as):
         _ase = []
